@@ -1,0 +1,457 @@
+*Licenciatura en ciencias genomicas - Curso de estadística con R 2021*
+
+**Salvador Gonzalez Juarez**
+
+# <span style="color:darkblue"> Tarea 4: Tarea Probabilidad I (Teoría de conjuntos, CDFs y etc.) </span>
+
+****
+
+## <span style="color:orange"> 0.0.1 Teoría de Conjuntos </span>
+
+En esta primer parte de la tarea revisaremos conceptos básicos de teoría de conjuntos. En particular demostrarán la propiedad de distributividad de las operaciones de unión e intersección de conjuntos, y las leyes de Morgan. Sea *Ω* un conjunto y *A*, *B*, *C* ⊂ *Ω*. Las leyes de Morgan son las siguientes:
+
+- **Primera ley de Morgan:** $(A \cap B)^c = A^c \cup B^c$
+- **Segunda ley de Morgan:** $(A \cup B)^c = A^c \cap B^c$
+
+### <span style="color:red"> 1. (3 puntos) Demuestra las leyes de Morgan. </span>
+
+Para probar que las leyes de Morgan son correctas, debemos realizar una prueba de doble inclusión. Lo que entendi, es que es necesario que una contención de la igualdad este contenida en la otra, y visceversa. Para realizarlo, son necesarias dos reglas: 
+$$1: \space\space x \in A^c = x \notin A$$ 
+$$2: \space\space x \notin A = x \in A^c$$
+
+- **Para la primera ley de Morgan:**
+
+**Probando la primer inclusión:** $(A \cap B)^c \subset A^c \cup B^c$
+
+Para cualquier *x* que pertenezca al complemento de la primer contención, esta no se encontrara en la contención sin el complemento. Utilizando regla 1, se puede deducir que: 
+$$x \in (A \cap B)^c$$
+$$x \notin A \cap B$$
+
+Como hay una intersección, *x* puede pertenecer sólo a uno de los conjuntos y no a ambos al mismo tiempo:
+$$x \notin A \space\space o \space\space x \notin B$$
+
+Ahora utilizamos la regla 2, y deducimos lo siguiente:
+$$x \in A^c \space\space o \space\space x \in B^c$$
+
+Finalmente, en notación de conjuntos se demuestra que esta contenida en la otra contención:
+$$x \in A^c \cup B^c$$
+
+**Probando la segunda inclusión:** $A^c \cup B^c \subset (A \cap B)^c$
+
+A partir de la primer contención, se puede deducir que *x* pertenece a uno u otro de los conjuntos que la componen:
+$$x \in A^c \cup B^c$$
+$$x \in A^c \space\space o \space\space x \in B^c$$
+
+Ya que *x* no pertenece a *A* o a *B*, *x* no puede pertenecer a la instersección de ambos conjuntos. Utilizando la regla 1, obtenemos lo sigiente:  
+$$x \notin A \space\space o \space\space x \notin B$$
+$$x \notin A \cap B$$
+
+Finalmente, utilizando la regla 2 se demuestra que esta contenida en la otra contención:
+$$x \in (A \cap B)^c$$
+
+- **Para la segunda ley de Morgan:**
+
+**Probando la primer inclusión:** $(A \cup B)^c \subset A^c \cap B^c$
+
+Para cualquier *x* que pertenezca al complemento de la primer contención, esta no se encontrara en la contención sin el complemento. Utilizando regla 1, se puede deducir que: 
+$$x \in (A \cup B)^c$$
+$$x \notin A \cup B$$
+
+Como hay una unión, *x* no pertenece a ninguno de los conjuntos:
+$$x \notin A \space\space y \space\space x \notin B$$
+
+Ahora utilizamos la regla 2, y deducimos lo siguiente:
+$$x \in A^c \space\space y \space\space x \in B^c$$
+
+Finalmente, en notación de conjuntos se demuestra que esta contenida en la otra contención:
+$$x \in A^c \cap B^c$$
+
+**Probando la segunda inclusión:** $A^c \cap B^c \subset (A \cup B)^c$
+
+A partir de la primer contención, se puede deducir que *x* pertenece a la intersección de los conjuntos que la componen:
+$$x \in A^c \cap B^c$$
+$$x \in A^c \space\space y \space\space x \in B^c$$
+
+Ya que *x* no pertenece a *A* ni a *B*, *x* no puede pertenecer a la unión de ambos conjuntos. Utilizando la regla 1, obtenemos lo sigiente:  
+$$x \notin A \space\space y \space\space x \notin B$$
+$$x \notin A \cup B$$
+
+Finalmente, utilizando la regla 2, se demuestra que esta contenida en la otra contención:
+$$x \in (A \cup B)^c$$
+
+****
+
+Por otro lado, las propiedades de distributividad son las siguientes
+
+- **Primera propiedad de distributividad:** $A \cup (B \cap C) = (A \cup B) \cap (A \cup C)$
+- **Segunda propiedad de distributividad:** $A \cap (B \cup C) = (A \cap B) \cup (A \cap C)$
+
+### <span style="color:red"> 2. (1 punto) Demuestra la segunda contención de la primer ley de distributividad. </span>
+
+A traves de la inclusión, se demuestra que la segunda contención de la igualdad esta contenida en la primera:
+$$(A \cup B) \cap (A \cup C) \subset A \cup (B \cap C)$$
+$$x \in (A \cup B) \cap (A \cup C)$$
+
+Por lo tanto, *x* pertenece a ambos componentes, y a cada conjunto:
+$$(x \in A \cup B) \space\space y \space\space (x \in A \cup C)$$
+$$(x \in A \space\space o \space\space x \in B) \space\space y \space\space (x \in A \space\space o \space\space x \in C)$$
+
+Como el conjunto *A* esta presente en ambos componentes, se puede expresar de la siguiente forma:
+$$x \in A \space\space o \space\space (x \in B \space\space y \space\space x \in C)$$
+
+Ya que *x* pertence a *B* y *C*, *x* pertenece a la intersección entre ambos. 
+$$x \in A \space\space o \space\space(x \in B \cap C) $$
+
+Finalmente, en notación de conjuntos se demuestra que esta contenida en la otra contención:
+$$x \in A \cup (B \cap C)$$
+
+****
+
+## <span style="color:red"> 3. (2 puntos) Demuestra la segunda ley de distributividad. </span>
+
+De nuevo se debe hacer uso de una doble inclusión.
+
+**Probando la primer inclusión:** $x \in A \cap (B \cup C) \subset (A \cap B) \cup (A \cap C)$
+
+Lo anterior puede ser expresado como:
+$$x \in A \space\space y \space\space (x \in B \cup C)$$
+$$x \in A \space\space y \space\space (x \in B \space\space o \space\space x\in C)$$
+
+A continuación, se aplican las leyes de la lógica proposicional:
+$$(x \in A \space\space y \space\space x \in B) \space\space o \space\space (x \in A \space\space y \space\space x \in C)$$
+
+Finalmente, en notación de conjuntos se demuestra que esta contenida en la otra contención:
+$$(x \in A \cap B) \space\space o \space\space (x \in A \cap C)$$
+$$x \in (A \cap B) \cup (A \cap C)$$
+
+**Probando la segunda inclusión**: $(A \cap B) \cup (A \cap C) \subset A \cap (B \cup C)$
+
+Lo anterior puede ser expresado como:
+$$x \in (A \cap B) \cup (A \cap C)$$
+
+Por lo tanto, *x* pertenece a ambos componentes, y a cada conjunto:
+$$(x \in A \cap B) \space\space o \space\space (x \in A \cap C)$$
+$$(x \in A \space\space y \space\space x \in B) \space\space o \space\space (x \in A \space\space y \space\space x \in C)$$
+
+Como el conjunto *A* esta presente en ambos componentes, se puede expresar de la siguiente forma:
+$$x \in A \space\space y \space\space (x \in B \space\space o \space\space x \in C)$$
+
+Ya que *x* pertence a *B* o *C*, *x* pertenece a la unión entre ambos. 
+$$x \in A \space\space y \space\space(x \in B \cup C) $$
+
+Finalmente, en notación de conjuntos se demuestra que esta contenida en la otra contención:
+$$x \in A \cap (B \cup C)$$
+
+****
+
+## <span style="color:orange"> 0.0.2 Funciones de (Cumulativas) Distribución </span>
+
+Considera una medida de probabilidad *P* en *R*. Define la función: $F_P(x) := P((-\infty, x])$. A esta función se le llama la funcion (cumulativa) de distribución de *P*.
+
+### <span style="color:red"> 4. (4 puntos) Utiliza los axiomas de la probabilidad, y las propiedades de las medidas de probabilidad vistas en clase para demostrar el siguiente teorema. </span>
+
+**Teorema 0.0.1.** La función cumulativa de distribución *F* de una medida de probabilidad *P* satisface.
+
+- $F(−\infty):= \lim_{x→−\infty} F(x)=0$
+
+En una sucesión monótona no creciente de números reales la cual diverge a menos infinito, se definen los eventos para cada número natural *n* y su probabilidad:
+$$A_n = (X \leqslant x_n)$$
+$$P(A)_n = F(x_n)$$
+
+Entonces, el límite de esta sucesión monótona de eventos es el conjunto vacío. Por lo tanto, la propiedad de continuidad de la probabilidad para sucesiones monótonas demuestra este punto:
+$$\lim_{x \rightarrow -\infty} F(x_n) = \lim_{x \rightarrow -\infty} P(A_n) = P(\emptyset) = 0$$
+
+- $F(∞):= \lim _{x→\infty} F(x) = 1$
+
+En una sucesión monótona no decreciente de números reales la cual diverge a infinito, se definen los eventos para cada número natural *n* y su probabilidad:
+$$A_n = (X \leqslant x_n)$$
+$$P(A_n) = F(x_n)$$
+
+Entonces, el límite de esta sucesión monótona de eventos es *Ω*. Por lo tanto, la propiedad de continuidad de la probabilidad para sucesiones monótonas demuestra este punto:
+$$\lim_{x \rightarrow \infty} F(x_n) = \lim_{x \rightarrow \infty} P(A_n) = P(\Omega) = 1$$
+
+- **F es continua por la derecha; i.e. para todo *y* ∈ *R*:** $\lim_{\epsilon\downarrow0}F(y+\epsilon) = F(y)$
+
+Es evidente que $(-\infty, y] \subset (-\infty, y + \epsilon]$. Por lo tanto, si $\epsilon \rightarrow 0$ desde los positivos, $y + \epsilon \rightarrow y$. Entonces:
+$$\lim_{\epsilon \downarrow 0}F(y+\epsilon) = F(y+0) = F(y)$$ 
+
+- **F tiene límites por la izquierda, i.e. para todo *y* ∈ *R*, el siguiente límite** $\lim_{\epsilon \downarrow 0}F(y-\epsilon)$ **existe:**
+
+Es evidente que $(-\infty, y - \epsilon] \subset (-\infty, y]$. Por lo tanto, si $\epsilon \rightarrow 0$ desde los positivos, $y - \epsilon \rightarrow y$. Entonces:
+$$\lim_{\epsilon \downarrow 0}F(y-\epsilon) = F(y-0) = F(y)$$ 
+
+- **F es no-decreciente, i.e. para toda pareja *x* ≤ *y*:** $F(x) \leqslant F(y)$
+
+Esto es cierto porque si *x* es menor o igual que *y*, entonces:
+$$(X \leqslant x) \subseteq (X \leqslant y)$$
+
+Por lo tanto, si se calcula la probabilidad de ambas contenciones se demuestra este punto:
+$$P(X \leqslant x) \subseteq P(X \leqslant y) = F(x) \leqslant F(y)$$
+
+****
+
+**Definicion 0.0.1.** Sea *P* una medida de probabilidad y *F* su función de distribución. Sea *p* ∈ [0,1]. Al número *q* ∈ *R* que cumple que: $F(q) \geqslant p$ y que si q' es tal que $F(q′) \geqslant p$ entonces $q \leqslant q′$, se le llama el cuantil *p* de *P*. 
+
+Intuitivamente al p-cuantil de *P* se le puede pensar simplemente como el número *q* tal que $F(q) = p$,de hecho cuando $F_p$ es estrictamente creciente y continua esta intuición corresponde con la definición formal, y más aún, $q = F_P^{-1}(p)$ donde $F_P^{-1}$ es la función inversa de $F_P$. 
+
+La segunda parte de la definción (el pedir que $q \leqslant q'$ para todo *q'* que cumpla $F(q') \geqslant p)$ solo juega un papel importante cuando la función $F_P$ no es continua o no es estrictamente creciente, por ejemplo cuando *P* es una medida de probabilidad discreta.
+
+### <span style="color:red"> 5.(3 puntos) Construye una función de densidad a partir de la función: </span>
+$$
+f(x):=\left\{
+\begin{array}{ll}
+0 & \text{si } -\infty < x \leqslant 0 \\
+1 & \text{si } 0 \leqslant x \leqslant 10 \\
+1 + \frac{x-10}{10} & \text{si } 10 \leqslant x \leqslant 20 \\
+0 & \text{si } x > 20 
+\end{array}
+\right.
+$$
+
+**(a) Calcula la función de distribución resultante.**
+
+El área bajo toda la curva de densidad es: $\int\limits_{-\infty}^{\infty}f(x)dx = 1$ Debemos realizar la integral para cada parte de la función:
+$$\int\limits_{-\infty}^0 (0)dx \space + \int\limits_{0}^{10} (1)dx \space + \int\limits_{10}^{20} (1+\frac{x-10}{10})dx \space + \int\limits_{0}^{\infty} (0)dx = 0 + 10 + 15 + 0 = 25$$
+
+Como dije arriba, para ser una función de densidad es necesario que el área sea igual a 1. Por lo tanto, voy a escalar f(x) con un factor *C*, recuperado del paso anterior: $C = \frac{1}{25}$. Por lo tanto la función de densidad queda así:
+$$
+f(x):=\left\{
+\begin{array}{ll}
+(0)(\frac{1}{25}) & \text{si } -\infty < x \leqslant 0 \\
+(1)(\frac{1}{25}) & \text{si } 0 \leqslant x \leqslant 10 \\
+(1 + \frac{x-10}{10})(\frac{1}{25}) & \text{si } 10 \leqslant x \leqslant 20 \\
+(0)(\frac{1}{25}) & \text{si } x > 20 
+\end{array}
+\right.
+$$
+
+$$
+f(x):=\left\{
+\begin{array}{ll}
+0 & \text{si } -\infty < x \leqslant 0 \\
+\frac{1}{25} & \text{si } 0 \leqslant x \leqslant 10 \\
+\frac{1}{25} + \frac{x-10}{250} & \text{si } 10 \leqslant x \leqslant 20 \\
+0 & \text{si } x > 20 
+\end{array}
+\right.
+$$
+
+A continuación, probabmos que el área sea igual a 1:
+$$\int\limits_{-\infty}^0 (0)dx \space + \int\limits_{0}^{10} (\frac{1}{25})dx \space + \int\limits_{10}^{20} (\frac{1}{25}+\frac{x-10}{250})dx \space + \int\limits_{0}^{\infty} (0)dx = 0 + \frac{2}{5} + \frac{3}{5} + 0 = 1$$
+
+Ahora, debemos hallar la función de distribución acumulada, utilizando la siguiente regla: $F_X(x) = P(X \leqslant x) = \int\limits_{-\infty}^x f_X(t)dt$
+
+- Si $-\infty < x \leqslant 0$:
+$$F_X(x) = \int\limits_{-\infty}^x (0)dt = 0$$
+
+- Si $0 \leqslant x \leqslant 10$:
+$$F_X(x) = \int\limits_{0}^x (\frac{1}{25})dt = \frac{x}{25}$$
+
+- Si $10 \leqslant x \leqslant 20$
+$$F_X(x) = \int\limits_{0}^{10} (\frac{1}{25})dt \space + \int\limits_{10}^{x} (\frac{1}{25} + \frac{x-10}{250})dt = \frac{2}{5} + \frac{x²-100}{500} = \frac{x²+100}{500}$$
+
+- Si $x > 20$
+$$F_X(x) = \int\limits_{-\infty}^x (1)dt = 1$$
+
+Por lo tanto, la funcion de distribución cumulativa queda de la siguiente forma:
+$$
+f(x):=\left\{
+\begin{array}{ll}
+0 & \text{si } -\infty < x \leqslant 0 \\
+\frac{x}{25} & \text{si } 0 \leqslant x \leqslant 10 \\
+\frac{x²+100}{500} & \text{si } 10 \leqslant x \leqslant 20 \\
+1 & \text{si } x > 20 
+\end{array}
+\right.
+$$
+
+**(b) Calcula los cuantiles 1/4, 1/3 y 3/4.**
+
+Se reuelve la primer integral: 
+$$\int_0^{10}(\frac{1}{25})dx = \frac{1}{25}\int_0^{10}(1)dx = \frac{2}{5}$$
+
+Como $\frac{2}{5} > \frac{1}{4} \space y \space \frac{1}{3}$, ambos cuantiles se calculan de la sigueiente manera:
+
+- $\frac{1}{4}$:
+$$
+\frac{1}{25}\int_0^q(1)dx=\frac{1}{4} \\ \frac{x}{25}\bigg|_0^q=\frac{1}{4} \\ \frac{q}{25}-0=\frac{1}{4}\\ q(\frac{1}{4})=\frac{25}{4}=6.25
+$$
+
+- $\frac{1}{3}$:
+$$\frac{1}{25}\int_0^q(1)dx=\frac{1}{3} \\ \frac{x}{25}\bigg|_0^q=\frac{1}{3} \\ \frac{q}{25}-0=\frac{1}{3}\\q(\frac{1}{3})=\frac{25}{3}=8.333...$$
+
+$\frac{3}{4} > \frac{2}{5}$ y por lo tanto el cunatil se calcula de la siguiente forma:
+$$\frac{2}{5}+\int_{10}^{20}(\frac{1}{25} + \frac{x-10}{250})dx = \frac{2}{5} + \frac{1}{25} \int_{10}^{20}(1 + \frac{x-10}{10})dx = 1$$
+
+-  $\frac{3}{4}$:
+$$
+\frac{2}{5} + \frac{1}{25}\int_{10}^q(1 + \frac{x-10}{10})dx = \frac{3}{4} \\  \frac{1}{25}(1 + \frac{x-10}{10}) \bigg|_{10}^q = \frac{3}{4} - \frac{2}{5} \\ (1 + \frac{x-10}{10}) \bigg|_{10}^q = \frac{7}{20}(25) \\ \frac{q^2}{20} - 5 = \frac{35}{4} \\ \frac{q^2}{20} = \frac{35}{4} + 5 \\ \frac{q^2}{20} = \frac{55}{4} \\ q^2 = 275 \\ q (\frac{3}{4}) = \sqrt{275} = 16.5831
+$$
+
+****
+
+### <span style="color:red"> 6.(3 puntos) Considera la medida de probabilidad discreta en *R* que le asigna un peso e^{−λ}·λk/k! al punto *k* ∈ {0,1,2, ...}, donde *λ*>0 es un parámetro de la distribución. A esta distribución de probabilidad discreta se le conoce como la distribución de Poisson de parametro *λ*. </span>
+
+- **Utiliza la expansión en serie de Taylor alrededor del 0 de la función exponencial para argumentar que la medida propuesta si es efectivamente una medida de probabilidad.**
+
+La serie de Taylor es:
+$$f(x) = \sum_{n=0}^\infty \frac{f^{(n)}(a)}{n!}(x-a)^n$$
+
+Si se utiliza la serie de Taylor con centro en cero, de la función exponencial $e^x$ se tiene que:
+$$f(x) = \sum_{n=0}^\infty \frac{f^{(n)}(0)}{n!}(x)^n = 1 + x + \frac{x²}{2} + \frac{x³}{6} + \frac{x⁴}{24} + ... = \sum_{n=0}^\infty \frac{x^n}{n!} = e^x $$
+
+Por lo tanto, al sumar todos los valores en la distribución podemos sustituir con la sumatoria de arriba. Entonces, se tiene un producto de funciones exponenciales, ambas con el mismo exponente pero de diferente signo. El resultado del producto es 1, el mismo valor de la suma de todas las probabilidades en una medida de probabilidad:
+$$P(\Omega) = \sum_{k=0}^\infty e^{- \lambda}\frac{\lambda^k}{k!} = e^{- \lambda} \sum_{k=0}^\infty \frac{\lambda^k}{k!} = e^{-\lambda} e^\lambda = 1$$
+
+- **Crea una función de R que reciba un parámetro *λ* > 0 (posiblemente un vector) y que dibuje una gráfica en donde se pueda visualizar la distribución Poisson para los distintos valores de *λ* en una sola figura. Puedes utilizar la función dpois de R.**
+
+```{r}
+# La funcion para graficar la distibucion de Poisson necesita dos parametros:
+# lambda: vector que contiene los valores de lambda
+# x: limite maximo en el eje x para calcular la distribucion de Poisson
+graficar_poisson <- function(lambda, x){
+  
+  # Defino cual sera el el dominio en el eje x de la distribucion
+  vector_x <- seq(0, x, by=1)
+  
+  # Genero un vector que posee un color para cada valor de lambda
+  gradiente <- rainbow(length(lambda))
+  
+  # Creo una matriz que contiene los valores que describen la distribucion para cada valor de lambda
+  distribucion <- sapply(lambda, function(i, vector_x){dpois(vector_x, i)}, vector_x)
+  
+  # Grafico las distribuciones resultantes
+  plot(vector_x, type = "n", xlab = "x", ylab="P(X = x)", main = "Distribucion de Poisson", ylim=c(0,0.4), xlim=c(0,x))
+    for (i in 1:length(lambda)) {
+    lines(vector_x, distribucion[,i], lwd=2, col=gradiente[i])
+  }
+    legend(15, 0.4, lambda, cex=0.8, fill=gradiente, bty='n', title="Valores de lambda")
+}
+
+# Asigno los valores de lambda que se quieren analizar y el limite maximo en el eje x
+lambda = c(1, 2, 3, 5, 7.5, 10)
+x = 20
+
+# Grafico la distribucion de Poisson para cada valor de lambda
+distribucion <- graficar_poisson(lambda[lambda > 0], x)
+```
+
+- **Crea una función de R que reciba un parámetro *λ* (posiblemente un vector) y que dibuje una gráfica en donde se pueda visualizar la función cumulativa de distribución de Poisson para los distintos valores de *λ* en una sola figura. Puedes utilizar la función ppois de R.**
+
+```{r}
+# La funcion para graficar la funcion cumulativa de distibucion de Poisson necesita dos parametros:
+# lambda: vector que contiene los valores de lambda
+# x: limite maximo en el eje x para calcular la funcion
+graficar_poisson_cumulativa <- function(lambda, x){
+  
+  # Defino cual sera el el dominio en el eje x de la funcion
+  vector_x <- seq(0, x, length.out=1000)
+  
+  # Genero un vector que posee un color para cada valor de lambda
+  gradiente <- rainbow(length(lambda))
+  
+  # Creo una matriz que contiene los valores que describen la funcion cumulativa de distribucion para cada valor de lambda
+  f_cumulativa <- sapply(lambda, function(i, vector_x){ppois(vector_x, i)}, vector_x)
+  
+  # Grafico las funciones cumulativas resultantes
+  plot(vector_x, type = "n", xlab = "x", ylab="P(X <= x)", main = "Funcion cumulativa de la distribucion de Poisson", ylim=c(0,1), xlim=c(0,x))
+    for (i in 1:length(lambda)) {
+    lines(vector_x, f_cumulativa[,i], type='p', lwd=0.5, col=gradiente[i])
+  }
+  legend(15, 0.5, lambda, cex=0.8, fill=gradiente, bty='n', title="Valores de lambda")
+}
+
+# Asigno los valores de lambda que se quieren analizar y el limite maximo en el eje x
+lambda = c(1, 2, 3, 5, 7.5, 10)
+x = 20
+
+# Grafico la funcion cumulativa de distribucion de Poisson para cada valor de lambda
+distribucion <- graficar_poisson_cumulativa(lambda[lambda > 0], x)
+```
+
+****
+
+### <span style="color:red"> 7. (4 puntos) Sean α, β > 0 dos parámetros y considera la medida de probabilidad en R+ continua con función de densidad f(x|α, β) = (βα/Γ(α))x^(α−1)e^(−βx), donde Γ es la función Gamma. A esta medida de probabilidad se le llama la distribución Gamma de parámetros α, β. </span>
+
+- **Crea una función de R que reciba dos parámetros *α* y *β* (posiblemente vectores) y que dibuje una gráfica en donde se pueda visualizar la distribución Gamma para las distintas parejas (*α*, *β*) en una sola figura. Puedes asumir que los vectores *α* y *β* son del mismo tamaño y también puedes utilizar la función dgamma de R.**
+
+```{r}
+# La funcion para graficar la distibucion de Gamma necesita tres parametros:
+# alfa: vector que contiene los valores de alfa
+# beta: vector que contiene los valores de beta
+# x: limite maximo en el eje x para calcular la distribucion de Gamma
+# intervalo: longitud del intervalo entre cada valor de x
+graficar_gamma <- function(alfa, beta, x, intervalo){
+  
+  # Almacena los valores de alfa y beta juntos en una matriz
+  matriz <- cbind(alfa, beta)
+  
+  # Defino cual sera el el dominio en el eje x de la distribucion
+  vector_x <- seq(0, x, by=intervalo)
+  
+  # Genero un vector que posee un color para cada pareja de alfa-beta
+  gradiente <- rainbow(length(alfa))
+  
+  # Creo una matriz que contiene los valores que describen la distribucion para cada pareja de alfa-beta
+  distribucion <- apply(matriz, MARGIN=1 , function(i, vector_x){dgamma(x=vector_x, shape=i[1], scale=i[2])}, vector_x)
+
+  # Grafico las distribuciones resultantes
+  plot(vector_x, type = "n", xlab = "x", ylab="P(X = x | Alfa, Beta)", main = "Distribucion de Gamma", ylim=c(0,0.5), xlim=c(0,x))
+    for (i in 1:length(alfa)) {
+    lines(vector_x, distribucion[,i], lwd=2, col=gradiente[i])
+  }
+    legend(10, 0.5, paste('Alfa:', alfa, '; Beta:', beta, sep=" "), cex=0.8, fill=gradiente, bty='n', title="Valores")
+}
+
+# Asigno los valores de alfa y beta que se quieren analizar, el limite maximo en el eje x y la longitud del intervalo
+alfa = c(0.5, 1, 2, 3, 5, 10)
+beta = c(1, 2, 2, 2, 1, 0.5) 
+x = 15
+intervalo = 0.2
+
+# Grafico la distribucion de Gamma para cada pareja de alfa y beta
+distribucion <- graficar_gamma(alfa, beta, x, intervalo)
+```
+
+- **Crea una función de R que reciba dos parámetros *α* y *β* (posiblemente vectores) y que dibuje una gráfica en donde se pueda visualizar la función cumulativa de distribución Gamma para las distintas parejas (*α*, *β*) en una sola figura. Puedes asumir que los vectores *α* y *β* son del mismo tamaño y también puedes utilizar la función pgamma de R.**
+
+```{r}
+# La funcion para graficar la funcion cumulativa de distibucion de Gamma necesita tres parametros:
+# alfa: vector que contiene los valores de alfa
+# beta: vector que contiene los valores de beta
+# x: limite maximo en el eje x para calcular la funcion
+# intervalo: longitud del intervalo entre cada valor de x
+graficar_gamma_cumulativa <- function(alfa, beta, x, intervalo){
+  
+  # Almacena los valores de alfa y beta juntos en una matriz
+  matriz <- cbind(alfa, beta)
+  
+  # Defino cual sera el el dominio en el eje x de la funcion
+  vector_x <- seq(0, x, by=intervalo)
+  
+  # Genero un vector que posee un color para cada pareja de alfa-beta
+  gradiente <- rainbow(length(alfa))
+  
+  # Creo una matriz que contiene los valores que describen la funcion cumulativa de la distribucion para cada pareja de alfa-beta
+  distribucion <- apply(matriz, MARGIN=1 , function(i, vector_x){pgamma(q=vector_x, shape=i[1], scale=i[2])}, vector_x)
+
+  # Grafico las funciones cumulativas resultantes
+  plot(vector_x, type = "n", xlab = "x", ylab="P(X <= x | Alfa, Beta)", main = "Funcion cumulativa de la distribucion de Gamma", ylim=c(0,1), xlim=c(0,x))
+    for (i in 1:length(alfa)) {
+    lines(vector_x, distribucion[,i], lwd=2, col=gradiente[i])
+  }
+    legend(10, 0.5, paste('Alfa:', alfa, '; Beta:', beta, sep=" "), cex=0.8, fill=gradiente, bty='n', title="Valores")
+}
+
+# Asigno los valores de alfa y beta que se quieren analizar, el limite maximo en el eje x y la longitud del intervalo
+alfa = c(0.5, 1, 2, 3, 5, 10)
+beta = c(1, 2, 2, 2, 1, 0.5) 
+x = 15
+intervalo = 0.2
+
+# Grafico la funcion cumulativa de distribucion de Gamma para cada pareja de alfa y beta
+distribucion <- graficar_gamma_cumulativa(alfa, beta, x, intervalo)
+```
+
+
+

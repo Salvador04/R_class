@@ -1,0 +1,84 @@
+*Licenciatura en ciencias genomicas - Curso de estadistica con R 2021*
+
+**Salvador Gonzalez Juarez**
+
+# <span style="color:darkblue"> Tarea 2: Isoformas </span>
+
+### <span style="color:orange"> En esta tarea vamos a simular valores de tasas de decaimiento para las distintas isoformas de un gen. </span>
+
+****
+
+**1. (1 punto) Consideremos un conjunto de 50,000 genes. Para cada gen primero vamos a simular el numero de isoformas de transcritos asociadas a ese gen utilizando una distribucion binomial de parametros *p=0.5* y *n=5*; si este valor resulta ser 0 entonces el numero de isoformas sera 1.**
+
+```{r}
+# Defino una funcion que me va a ayudar a filtrar los 0s en un vector y sumarles 1
+quitar_ceros <- function(x){
+  numero <- ifelse(x == 0, 1, x)
+  return(numero)
+}
+
+# Genera el vector con el numero de isoformas de cada gen y al vector le aplico la funcion quitar_ceros()
+num_isoformas <- sapply(rbinom(50000, size=5, prob=0.5), quitar_ceros)
+head(num_isoformas, 10)
+```
+
+****
+
+**2. (2 puntos) Ahora, para simular las tasas de decaimiento de cada isoforma primero simularemos un valor τ con distribucion Normal (*μ=10, σ= 1*) distinto para CADA GEN. Utilizando el τ de cada gen simulamos las tasas de decaimiento de cada isoforma asociada a ese gen apartir de una distribucion exponencial de parametro *rate=|τ|* y calculando el entero inmediatamente mayor al valor obtenido. Sugerencia obligatoria: Utiliza rexp con vectores como parametros.**
+
+```{r}
+# Es necesario conocer la cantidad de isoformas existentes entre todos los genes
+total_isoformas <- sum(num_isoformas)
+
+# Ahora generamos la tasa de decaimiento de cada isoforma, por lo tanto sera un vector con longitud del numero de isoformas totales
+# Para calcular el valor del parametro rate= en la funcion rexp() se genera un vector de longitud del numero de genes, que contiene valores simulados
+tasa_isoformas <- rexp(total_isoformas, rate=abs(rnorm(50000, mean=10, sd=1)))
+head(tasa_isoformas, 10)
+```
+
+****
+
+**3. (1 punto) Asigna a cada isoforma una categoria entre “Tejido A” y “Tejido B” con probabilidades 0.6 y 0.4 respectivamente. Sugerencia: utiliza la funcion sample, o la funcion rbinom y accesando al vector (“Tejido A”, “Tejido B”) con un vector de indices.**
+
+```{r}
+# Genero un vector que contiene, por cada elemento, una de las dos categorias, y su longitud debe ser el numero de isoformas totales 
+categoria_genes <- sample(c("Tejido_A", "Tejido_B"), size=total_isoformas, replace=TRUE, prob=c(0.6, 0.4))
+
+# Genero ademas un vector con indices repetidos con el que puedo asignar el gen de cada isoforma
+genes <- rep(1:50000, num_isoformas)
+
+# Finalemente, genero un dataframe para asociar a cada isoforma (representada por su tasa de decaimiento) el gen del cual provino y su categoria
+info_isoformas <- data.frame("Gen"=genes, "Tasa_de_decaimiento"=tasa_isoformas, "Tejido"=categoria_genes)
+head(info_isoformas, 20)
+```
+
+****
+
+**4. (4 puntos) Utilizando la funcion tapply debes recuperar las isoformas mas estables para cada gen, su tasa de decaimiento y su categoria. Pista: Utiliza un vector con nombres como parametro X para tapply o, alternativamente, utiliza un vector de ındices.**
+
+```{r}
+# Para buscar las menores tasas utilizo tapply() y como parametro la funcion min(), con lo que genero un vector con esos elementos
+vector_estables <- tapply(info_isoformas$Tasa_de_decaimiento, info_isoformas$Gen, min)
+
+# Haciendo un match entre ese vector y el vector original de las tasas, podemos encontrar el indice de cada uno
+indices_estables <- c(match(vector_estables, tasa_isoformas))
+
+# Utilizando sus indices, podemos encontrar la informacion de cada isoforma en el dataframe
+isoformas_estables <- info_isoformas[indices_estables,]
+head(isoformas_estables[order(isoformas_estables$Gen),],20)
+```
+
+****
+
+**5. (1 punto) Obten la tasa mas estable para cada gen y calcula el promedio sobre todos los genes.**
+
+```{r}
+# Las tasas mas estables de cada gen se muestran en el output del inciso anterior
+# Aplico la funcion mean() sobre la columna de las tasas en el dataframe para encontrar el promedio
+mean(isoformas_estables$Tasa_de_decaimiento)
+```
+
+
+
+
+

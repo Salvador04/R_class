@@ -1,0 +1,249 @@
+*Licenciatura en ciencias genomicas - Curso de estadística con R 2021*
+
+**Salvador Gonzalez Juarez**
+
+# <span style="color:darkblue"> Tarea 3: Expresión génica </span>
+
+### <span style="color:orange"> El objetivo de esta tarea es que simulen datos de expresión de genes en dos condiciones diferentes y con 15 réplicas para cada gen y condición. Despúes visualizaran los datos mediante gráficas. </span>
+
+***
+
+**(1 punto) Ejercicio 1: Genera un conjunto de 50,000 genes con nombres (gene1, ..., gene50,000). Para cada gen escoge una categoría: Activador, Represor o Ambivalente, con probabilidades 0.5, 0.4 y 0.1 respectivamente.**
+
+```{r}
+# Creo el conjunto de los nombres de los genes
+n_genes <- 1:50000
+genes <- c(paste("gene", n_genes, sep=""))
+
+# Creo un conjunto con la categoria respectiva para cada gen, y asocio ambos conjuntos en un data frame.
+categoria <- sample(c("Activador", "Represor", "Ambivalente"), size=length(n_genes), replace=TRUE, prob=c(0.5, 0.4, 0.1))
+info_genes <- data.frame("Gen"=genes, "Categoria"=categoria)
+
+# Imprimo la informacion de los primeros diez genes
+head(info_genes, 10)
+```
+
+***
+
+**(4 puntos) Ejercicio 2: Genera los valores de expresión de los 50,000 genes para cada una de las 15 réplicas de cada condición. Para cada gen y cada condición debes generar 15 valores aleatorios de una distribución Normal con media *μ=M* y desviación estándar *sd=M/2*, donde *M* es un valor distinto para cada pareja gen/condición y es escogido al azar de una distribución *Gamma* con parámetros *shape=5* y *scale=2*.**
+
+```{r}
+# La siguiente funcion retorna una matriz con los valores de expresion de cada gen en 15 condiciones
+obtener_expresion <- function(x){
+  
+  # Calculo el valor de M para cada gen
+  M = rgamma(x, shape=5, scale=2)
+  
+  # Calculo el valor de expresion para las 15 condiciones de un solo gen
+  condicion <- sapply(M, function(M){
+    rnorm(15, mean=M, sd=(M/2))})
+  
+  # Retorna la matriz resultante
+  return(condicion)
+}
+
+# Obtengo un array tridimencional con la informacion de expresion de cada gen en las dos condiciones
+expresion <- array(c(obtener_expresion(n_genes), obtener_expresion(n_genes)), c(15,length(n_genes),2))
+
+# Imprimo los valores de expresion del gen1 en cada condicion
+expresion[,1,]
+```
+
+***
+
+**(1 punto) Ejercicio 3: En este momento para cada gen debes tener 30 valores de expresión, 15 para la condición 1 y 15 para la condición 2. Escoge 30 genes al azar y gráfica la dinámica de expresión de estos 30 genes dentro de la misma figura, tomando al eje X como el tiempo y al eje Y como los valores de expresión (estamos suponiendo que los 30 valores de expresión corresponden a mediciones a lo largo del tiempo). Ver la ayuda las funciones *plot* y *lines*, incluyendo el parámetro *ylim* para asegurarte que el rango de todos los valores de expresión estén contenidos en la figura.**
+
+```{r}
+# Selecciono 30 genes de forma aleatoria
+n_selec <- 30
+genes_selec <- sample(n_genes, size=n_selec, replace=FALSE)
+
+# Grafico la dinamica de expresion de un solo gen
+plot(1:30, expresion[, genes_selec[1], ],
+     
+     # Modifico las caracteristicas de las lineas
+     type='l', col='black', lwd=2, main='Ejercicio 3',
+     
+     # Modifico los limites de la grafica
+     ylim=c(min(expresion), max(expresion)),
+     
+     # Modifico la documentacion de la grafica
+     xlab='tiempo', ylab='valor de expresion')
+
+# Creo un vector con un numero de colores equivalente al numero de genes seleccionados
+colors <- rainbow(n_selec)
+
+# Grafico la dinamica de expresion de los demas genes, con sus respectivos colores
+i = 1
+for (n in genes_selec[2:n_selec]) {
+  lines(1:30, expresion[, n, ], col=colors[i], lwd=2)
+  i = i + 1
+}
+```
+
+***
+
+**(1 punto) Ejercicio 4: Haz un heatmap con la dinámica de expresión de los 30 genes escogidos en el inciso anterior, donde los renglones correspondan a los genes y las columnas a los 30 niveles de expresión. Ver la ayuda de la función *heatmap*.**
+
+```{r}
+# Creo un heatmap de la dinamica de expresion de los genes seleccionados anteriormente
+heatmap(
+  
+  # Condenso la informacion de ambas condiciones para los genes seleccionados
+  t(array(expresion[, genes_selec, ], c(30, n_selec))),
+  
+  # Modifico el despliegue grafico del heatmap
+  scale="row", Colv = NA, Rowv = NA, col = heat.colors(256),
+  
+  # Modifico la documentacion del heatmap
+  labRow=genes[genes_selec], cexRow=0.65, xlab="valor de expresion", ylab="gen", main="Ejercicio 4")
+```
+
+***
+
+**(2 puntos) Ejercicio 5: Escoge 10 nuevos genes al azar y obtén el promedio de expresión para ambas condiciones por separado. Compara estos promedios de expresión mediante una gráfica de barras. Debes generar una sola gráfica para los 10 genes, las barras deben estar divididas en 10 grupos con 2 barras cada uno (correspondientes a los dos promedios de expresión de cada gen, uno para la condición 1 y el otro para la condición 2). Ver la ayuda de la función *barplot*.**
+
+```{r}
+# Selecciono aleatoriamente 10 nuevos genes
+n_selec <- 10
+genes_selec <- sample(n_genes, size=n_selec, replace=FALSE)
+
+# Guardo la informacion de cada gen en vectores separados por condicion
+prom_cond1 <- colMeans(expresion[, genes_selec, 1])
+prom_cond2 <- colMeans(expresion[, genes_selec, 2])
+
+# Creo una matriz con los vectores de las condiciones
+matriz_cond <- rbind(prom_cond1, prom_cond2)
+
+# Utilizando la matriz, creo una grafica de barras
+barplot(matriz_cond,
+        
+        # Modifico la documentacion de la grafica
+        main="Ejercicio 5", names.arg=genes[genes_selec], cex.names=0.6, xlab="gen", ylab="valor de expresion promedio",
+        
+        # Modifico las caracteristicas de la grafica
+        col=c("red", "blue"), beside=TRUE, ylim = c(0, max(matriz_cond)+5))
+
+# Creo una leyenda para la grafica
+legend("topright", c("Condicion 1","Condicion 2"), fill = c("red","blue"))
+```
+
+***
+
+**(2 puntos) Ejercicio 6: Calcula el estadístico *t* para comparar cuantitativamente los promedios de expresión de todos los genes en ambas condiciones. El estadístico *t* se calcula de la siguiente manera:**
+
+$$t := \frac{M_{1} - M_{2}}{\sqrt{\frac{V_{1}}{14}+\frac{V_{2}}{14}}}$$
+
+**donde *M1* y *M2* son los promedios de expresión de un gen en la condición 1 y la condición 2 respectivamente, y *V1* y *V2* son las varianzas correspondientes (puedes revisar *t-test* - aunque no es necesario entenderlo por completo en este momento-). Los genes cuyo valor del estadístico *t* sea tal que *|t|>3* son genes cuyo promedio de expresión difiere significativamente entre ambas condiciones.  Obtén los nombres de los genes con expresión diferencial y guárdalos en un archivo.**
+
+```{r}
+# Creo una funcion que calcula el estadistico t
+calcular_t <- function(a){
+  
+  # Calculo el promedio de expresion de cada gen en cada condicion
+  M1 <- colMeans(a[, , 1])
+  M2 <- colMeans(a[, , 2])
+  
+  # Calculo la varianza de la expresion de cada gen en cada condicion
+  V1 <- apply(a[, , 1], MARGIN=2, var)
+  V2 <- apply(a[, , 2], MARGIN=2, var)
+  
+  # Calculo y retorno el estadistico t
+  t <- (M1-M2)/sqrt((V1/14) + (V2/14))
+  return(t)
+}
+
+# Calculo los valores absolutos del resultado del estadistico t
+t_values <- abs(calcular_t(expresion))
+
+# Imprimo como resultado el nombre de los genes con expresion diferencial mayor al umbral
+genes_test <- genes[t_values > 3]
+head(genes_test, 20)
+
+# Escribo los resultados en un archivo externo
+write.table(genes_test, file='/home/salvador/Documentos/Licenciatura_Ciencias_Genomicas/Tercer_Semestre/Curso_R/Tarea3_Ejercicio6.txt', append=FALSE)
+```
+
+***
+
+**(1 punto) Ejercicio 7: Obtén los valores del estadístico *t* de todos los genes Activador y grafícalos en un histograma. Ver la ayuda de la función *hist*.**
+
+```{r}
+# Calculo el estadistico t de cada gen
+t_values <- calcular_t(expresion)
+
+# Realizo un histograma con los resultados del estadistico t de los genes activadores
+hist(t_values[categoria == 'Activador'], 
+     
+     # Modifico la documentacion de la grafica
+     main='Ejercicio 7', xlab='valor de t', ylab='frecuencia',
+     
+     # Modifico el color del histograma
+     col='lightblue')
+```
+
+***
+
+**(2 puntos) Ejercicio 8: Obtén los valores del estadístico *t* de todos los genes para cada una de las categorías: Activador, Represor y Ambivalente, y realiza tres gráficas *boxplot* en una misma figura, una para cada una de sus distribuciones. Ver la ayuda de la función *boxplot*.**
+
+```{r}
+# Guardo los valores de t pertenecientes a cada categoria
+t_activador <- t_values[categoria == 'Activador']
+t_represor <- t_values[categoria == 'Represor']
+t_ambivalente <- t_values[categoria == 'Ambivalente']
+
+# Creo un gradiente de colores para usar en las graficas
+gradiente <- colorRampPalette(c('lightblue','darkblue'))
+
+# Genero un boxplot con los valores de t para cada categoria
+boxplot(t_activador, t_represor, t_ambivalente,
+        
+        # Modifico la documentacion de la grafica
+        main='Ejercicio 8', names=c('Activador', 'Represor', 'Ambivalente'), 
+        
+        # Modifico las caracteristicas de las graficas
+        at=c(1,2,3), las=1, col=gradiente(3), horizontal = FALSE) 
+```
+
+***
+
+**(2 puntos) Ejercicio 9: Obtén los valores del estadístico *t* de todos los genes en cada una de las categorías por separado. Compara los 3 histogramas correspondientes, junto con el histograma obtenido al tomar todos los genes como un solo conjunto, en un solo device (en una sola imagen).**
+
+```{r}
+# Preparo el device para dibujar 4 graficas en la misma figura
+layout(matrix(c(1,2,3,4), nrow=2, byrow=TRUE))
+
+# Genero los histogramas con los valores del estadistico t separados por cada categoria 
+hist(t_activador, main='Ejercicio 9 - Activadores', xlab='valor de t', ylab='frecuencia', col='lightblue')
+hist(t_represor, main='Ejercicio 9 - Represores', xlab='valor de t', ylab='frecuencia', col='blue')
+hist(t_ambivalente, main='Ejercicio 9 - Ambivalentes', xlab='valor de t', ylab='frecuencia', col='darkblue')
+
+# Gennero el histograma con todos los valores del estadistico t
+hist(t_values, main='Ejercicio 9 - Todos los genes', xlab='valor de t', ylab='frecuencia', col='darkmagenta')
+```
+
+***
+
+**(1 punto) Ejercicio 10: Para cada una de las categorías obtén el número de genes tales que *|Z|>3* y después compararlos utilizando una gráfica de pie (función *pie*).**
+
+```{r}
+# Calcula el numero de valores t superiores al umbral para cada categoria
+total_activador <- length(t_activador[t_activador > 3])
+total_represor <- length(t_represor[t_represor > 3])
+total_ambivalente <-length(t_ambivalente[t_ambivalente > 3])
+
+# Calcula el numero de valores de t superiores al umbral
+total_genes <- length(t_values[t_values > 3])
+
+# Genero una grafica pie con las cantidades anteriores
+pie(c(total_activador, total_represor, total_ambivalente),
+    
+    # Modifico el color de cada zona del pie
+    col = gradiente(3),
+    
+    # Modifico la documentacion de la grafica, incluyendo la proporcion de cada categoria en el pie
+    main='Ejercicio 10',
+    labels=c(paste('Supresores', round(total_activador/total_genes, 2)),
+             paste('Represores', round(total_represor/total_genes, 2)), 
+             paste('Ambivalentes', round(total_ambivalente/total_genes, 2))))
+```

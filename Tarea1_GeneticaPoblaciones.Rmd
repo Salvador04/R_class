@@ -1,0 +1,110 @@
+*Licenciatura en ciencias genomicas - Curso de estadistica con R 2021*
+
+**Salvador Gonzalez Juarez**
+
+# <span style="color:darkblue"> Tarea Genetica Poblaciones: Modelo de Evolucion con Seleccion 1 </span>
+
+**En esta tarea van a simular la evolucion de una poblacion a lo largo del tiempo [1], en particular van a simular la evolucion de la distribucion del fitness de la poblacion a lo largo del tiempo.**
+
+**1. (3 puntos) Considera una poblacion que en la generacion *0* tiene *N0=100* individuos.** Asigna a cada individuo (*1<=i<=100*) de la generacion *0* un fitness *si* utilizando una distribucion Normal con media *0* y desviacion estandar *0.1*. Dentro de cada generacion *g*, el fitness de cada individuo determinara la cantidad de descendencia que tendra en la siguiente generacion (*g+1*). Cada individuo sera reemplazado en la siguiente generacion por *D* nuevos individuos, donde *D* es una variable aleatoria con distribucion Poisson de parametro: 
+
+$λ=exp(s−\frac{1}{Ng}(\sum_{i=1}^{Ng} si)+\frac{100}{Ng}−1)$
+
+En la formula anterior *s* es el fitness del individuo en cuestion y *Ng* el tamanio de la poblacion en la generacion *g*. Una posible interpretacion de la variable aleatoria *D* de un individuo es que si, por ejemplo, *D=0* entonces el individuo en cuestion no sobrevive en la generacion *g+1*, si *D=1* entonces sobrevive pero no tiene hijos, si *D=2* entonces sobrevive y ademas tiene un hijo, y ası sucesivamente. Una vez que la generacion *g* se reprodujo, el fitness de cada nuevo individuo en la generacion *g+1* sera heredado del individuo del que provino, y ademas sera actualizado al sumarle una variable aleatoria Normal con media *0* y desviacion estandar *0.1*. Simula una poblacion con *1000* generaciones. **Sugerencia obligatoria:** En cada paso de reproduccion, i.e.  en cada paso de *g* a *g+1*, utiliza el reciclaje de vectores en los parametros de las funciones **rpois** y **rnorm** para simular el numero de descendientes y la modificacion del fitness respectivamente.
+
+```{r}
+# Genero la poblacion inicial con la funcion rnorm() para determinar el fitness de cada individuo y le asigno un nombre a cada uno
+poblacion <- rnorm(100, mean=0, sd=0.1)
+names(poblacion) <- c(1:length(poblacion))
+
+# Genero una lista que contendra la informacion de todas las generaciones siguientes
+generaciones <- list()
+
+# Se simularan 1000 generaciones a partir de la generacion inicial
+for (i in 1:1000) {
+  
+  # Guardo informacion importante sobre la poblacion en cada generacion
+  tamanio <- length(poblacion)
+  fitness_promedio <- mean(poblacion)
+  
+  # Calculo la descendencia de la poblacion utilizando los parametros establecidos para lambda en rpois()
+  descendencia <- rpois(tamanio, exp(poblacion-fitness_promedio+(100/tamanio)-1))
+  
+  # Guarda el tamaño de la nueva poblacion y lo utiliza para reemplazar el vector por uno nuevo a partir del reciclaje de vectores
+  tamanio_nuevo <- sum(descendencia)
+  poblacion <- rep(poblacion, times=descendencia) + rnorm(tamanio_nuevo, mean=0, sd=0.1)
+  
+  # Se almacena toda la informacion de la poblacion en cada generacion
+  generaciones[[i]] <- poblacion
+}
+
+# Se imprime el fitness de los individuos de la ultima generacion
+generaciones[length(generaciones)]
+```
+
+***
+
+**2. (1 punto) Calcula el promedio de fitness para cada generacion.**
+
+```{r}
+# Declaro una funcion para sacar el promedio de cada una de las sublistas dentro de generaciones
+calcular_promedios <- function(x) {
+  promedio <- mean(unlist(x))
+  return(promedio)
+}
+
+# Creo un vector que contiene el promdio de todas las generaciones e imprime el resultado
+fitness_promedio <- lapply(generaciones, calcular_promedios)
+print(paste("Generacion", c(1:length(fitness_promedio)), ": ", fitness_promedio))
+```
+
+***
+
+**3. (2 puntos) Crea un data.frame cuya primer columna contenga el fitness de cada individuo en la generacion 2, y la segunda contenga el indice del padre en la generacion 1.**
+
+```{r}
+# Creo un data.frame con las columnas Fitness e Indice con la informacion de la segunda generacion
+generacion2 <- data.frame("Fitness"=generaciones[[2]], "Indice"=names(generaciones[[2]]))
+generacion2
+```
+
+***
+
+**4. (1 punto) Obten el valor de fitness menor y el indice del padre correspondiente.**
+
+```{r}
+# Utilizo la funcion which.min() para obtener la fila con el menor fitness
+generacion2[which.min(unlist(generacion2)),]
+```
+
+***
+
+**5. (1 punto) Ordena el data.frame por fitness.**
+
+```{r}
+# Ordeno el data.frame utilizando la funcion order(), indicando solo la columna Fitness
+generacion2_ordenada <- generacion2[order(generacion2$"Fitness"),]
+generacion2_ordenada
+```
+
+***
+
+**6. (1 punto) Ordena el data.frame por fitness y luego por inde del padre (en ese orden).**
+
+```{r}
+# De nuevo ordeno el data.frame utilizando la funcion order(), pero indicando ambas columnas
+generacion2_ordenada <- generacion2[order(generacion2$"Fitness", generacion2$"Indice"),]
+generacion2_ordenada
+```
+
+***
+
+**7. (1.5 puntos) Obten todos los valores de fitness que sean mayores a al menos el 80% de los valores de fitness de toda la poblacion.**
+
+```{r}
+# Estimo la fila localizada al 80% de la longitud total de columnas, e imprimo las columnas a partir de ella en el data.frame ordenado
+filas <- nrow(generacion2_ordenada)
+limite_inferior <- round((filas/10)*8)
+print(generacion2_ordenada[limite_inferior:filas,])
+```
+
