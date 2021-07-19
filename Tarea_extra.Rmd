@@ -1,0 +1,387 @@
+*Licenciatura en ciencias genomicas - Curso de estadística con R 2021*
+
+**Salvador Gonzalez Juarez**
+
+# <span style="color:darkblue"> Tarea Extra: Desigualdades Sociales en México </span>
+
+Los objetivos de ésta tarea son dos, uno académico y uno personal:
+
+- Fortalecer, a través de la práctica, las capacidades de análisis de datos incluyendo la solución de preguntas a través de cálculos explícitos y la visualización de los datos a través de gráficas, así como también la formulación de nuevas preguntas.
+
+- Generar apertura en la concepción de nuestra persona al reconocer las condiciones externas pasadas y presentes que han moldeado nuestro propio desarrollo personal. Cultivar un sentido de agradecimiento por estos factores externos positivos que se nos han dado en la construcción de nuestra persona, y reconocer que nosotros también podemos construir y formar parte de factores externos positivos para los demás.
+
+La elección de la base de datos y su análisis esta inspirado en el informe **“Desigualdades”** del 2018 publicado por el Colegio de México. Los datos con los que trabajaremos son los recolectados en la encuesta del Módulo de Movilidad Social Intergeneracional (MMSI) 2016 hecha por el INEGI. La base de datos descargada del INGEGI esta contenida en único archivo: **MMSI_2016.csv**; la descripción de cada columna del archivo esta contenida en **mmsi2016_fileDesc.xlsx**. 
+
+En el análisis de los datos debes tomar en cuenta la columna **Factor_Per** que indica el factor de multiplicación que se debe considerar para cada registro, es decir, indica el número de personas reales encuestadas cuyos datos fueron colapsados en un único registro de la base de datos por tener exactamente los mismos valores en cada variable - para así reducir la cantidad de datos almacenados -.
+
+```{r}
+# Primero es necesario tener acceso a los resultados de la encuesta
+encuesta <- read.csv('./MMSI_2016.csv')
+```
+
+---
+
+## Asistencia Escolar de los Padres y Escolaridad del Entrevistado (1 punto).
+
+Divide la población encuestada entre los que tienen **al menos un padre que asistió a la escuela** y los que no.
+
+- Calcula cuantas veces es más probable que una persona del primer grupo complete al menos la **primaria** en comparación con los del segundo grupo. Y al menos la **licenciatura**? **Maestría**? **Doctorado**?
+
+- Visualiza las tendencias relevantes de los datos con un gráfica.
+
+```{r}
+# Defino una funcion para obtener la probabilidad de dos casos excluyentes, y la comparacion entre ambos
+calcular_probabilidad <- function(caso1, caso2, grado) {
+  
+  # Encuentro los perfiles con grado igual o mayor al indicado
+  perfiles_grado <- encuesta$P8_3N >= grado
+  
+  # Encuentra la interseccion entre los perfiles del paso anterior y cada uno de los casos por separado 
+  perfiles_caso1 <- perfiles_grado & caso1
+  perfiles_caso2 <- perfiles_grado & caso2
+  
+  # Calculo el espacio muestral real para cada caso
+  individuos_caso1 <- sum(encuesta$Factor_Per[caso1], na.rm=TRUE)
+  individuos_caso2 <-  sum(encuesta$Factor_Per[caso2], na.rm=TRUE)
+  
+  # Normalizo los resultados para cada caso
+  proporcion_caso1 <- sum(encuesta$Factor_Per[perfiles_caso1], na.rm=TRUE) / individuos_caso1
+  proporcion_caso2 <- sum(encuesta$Factor_Per[perfiles_caso2], na.rm=TRUE) / individuos_caso2
+  
+  # Calculo cuantas veces es mas probable que suceda el Caso 1 comparado con el Caso 2, y retorno los resultados
+  probabilidad <- proporcion_caso1/proporcion_caso2
+  return(c(proporcion_caso1, proporcion_caso2, probabilidad))
+}
+```
+
+```{r}
+# Indico cuales son los grados escolares por analizar
+grados <- c(2, 9, 11, 12)
+grados_str <- c('primaria', 'licenciatura', 'maestria', 'doctorado')
+
+# Separo los perfiles entre aquellos cuyos padres al menos uno estudio y en los que ninguno estudio
+padres_estud <- (encuesta$P3_4 == 1) | (encuesta$P4_4 == 1)
+padres_no_estud <- (encuesta$P3_4 == 2) & (encuesta$P4_4 == 2)
+
+# Calculo la probabilidad  y algunos resultados relevantes para cada uno de los grados escolares
+resultados <- sapply(grados, calcular_probabilidad, caso1=padres_estud, caso2=padres_no_estud)
+
+# Imprime los resultados al comparar las probabilidades de ambos casos
+print(paste('Aquellos individuos que tienen al menos un padre que fue a la escuela tienen', round(resultados[3,], 4), 
+            'veces mas probabilidades de terminar el grado de', grados_str,
+            'comparado con aquellos que no tienen padres que fueron a la escuela.', sep=' '))
+
+# Utilizando la matriz anteriormente generada, dibujo una grafica de barras
+barplot(resultados[1:2,], main='Asistencia Escolar de los Padres y Escolaridad del Entrevistado', 
+        
+        # Modifico la documentacion de la grafica
+        names.arg=grados_str, cex.names=1, xlab='grado academico del entrevistado', ylab='probabilidad',
+        
+        # Modifico las caracteristicas de la grafica
+        col=c('red4', 'brown1'), beside=TRUE, ylim=c(0,1))
+
+# Escribo una leyenda para la grafica
+legend('topright', c('Al menos un padre fue a la escuela', 'Ningun padre fue a la escuela'), fill = c('red4','brown1'))
+```
+
+---
+
+## Analfabetismo de los Padres y Escolaridad del Entrevistado (1 punto).
+
+Divide la población encuestada entre los que tienen **al menos un padre no analfabeta** y los que sus dos padres son analfabetas.
+
+- Calcula cuantas veces es más probable que una persona del primer grupo (i.e. con al menos un padre no analfabeta) complete al menos la **primaria** en comparación con los hijos de padres analfabetas. Y al menos la **licenciatura**? **Maestría**? **Doctorado**?
+
+- Visualiza las tendencias relevantes de los datos con un gráfica.
+
+```{r}
+# Indico cuales son los grados escolares por analizar
+grados <- c(2, 9, 11, 12)
+grados_str <- c('primaria', 'licenciatura', 'maestria', 'doctorado')
+
+# Separo los perfiles entre cuyos padres hay alguno no analfabeta y en los que ambos son analfabetas
+padre_no_analfa <- (encuesta$P3_6 == 1) | (encuesta$P4_6 == 1)
+padres_analfa <- (encuesta$P3_6 == 2) & (encuesta$P4_6 == 2)
+
+# Calculo la probabilidad y algunos resultados relevantes para cada uno de los grados escolares
+resultados <- sapply(grados, calcular_probabilidad, caso1=padre_no_analfa, caso2=padres_analfa)
+
+# Imprime los resultados al comparar las probabilidades de ambos casos
+print(paste('Aquellos individuos que tienen al menos un padre no analfabeta tienen', round(resultados[3,], 4), 
+            'veces mas probabilidades de terminar el grado de', grados_str,
+            'comparado con aquellos cuyos padres son analfabetas.', sep=' '))
+
+# Utilizando la matriz anteriormente generada, dibujo una grafica de barras
+barplot(resultados[1:2,], main='Analfabetismo de los Padres y Escolaridad del Entrevistado', 
+        
+        # Modifico la documentacion de la grafica
+        names.arg=grados_str, cex.names=1, xlab='grado academico del entrevistado', ylab='probabilidad',
+        
+        # Modifico las caracteristicas de la grafica
+        col=c('darkorange4', 'orange'), beside=TRUE, ylim=c(0,1))
+
+# Escribo una leyenda para la grafica
+legend('topright', c('Al menos un padre es no es analfabeta', 'Ambos padres son analfabetas'), fill = c('darkorange4','orange'))
+```
+
+---
+
+## Secundaria de Padre y/o Madre y Escolaridad del Entrevistado (1 punto).
+
+Divide la población encuestada entre los que tienen **al menos un padre con primaria terminada** y los que no.
+
+- Calcula cuantas veces es más probable que una persona del primer grupo complete al menos la **secundaria** en comparación con los del segundo grupo. Y al menos la **licenciatura**? **Maestría**? **Doctorado**?
+
+- Visualiza las tendencias relevantes de los datos con un gráfica.
+
+```{r}
+# Indico cuales son los grados escolares por analizar
+grados <- c(3, 9, 11, 12)
+grados_str <- c('secundaria', 'licenciatura', 'maestria', 'doctorado')
+
+# Separo los perfiles entre cuyos padres hay alguno que termino la primaria y en los que ambos no terminaron la primaria
+padre_secu <- (encuesta$P3_5N >= 2 & encuesta$P3_5N != 99) | (encuesta$P4_5N >= 2 & encuesta$P4_5N != 99)
+padres_no_secu <- (encuesta$P3_5N < 2) & (encuesta$P4_5N < 2)
+
+# Calculo la probabilidad y algunos resultados relevantes para cada uno de los grados escolares
+resultados <- sapply(grados, calcular_probabilidad, caso1=padre_secu, caso2=padres_no_secu)
+
+# Imprime los resultados al comparar las probabilidades de ambos casos
+print(paste('Aquellos individuos que tienen al menos un padre que termino la primaria tienen', round(resultados[3,], 4), 
+            'veces mas probabilidades de terminar el grado de', grados_str, 
+            'comparado con aquellos cuyos padres no terminaron la primaria.', sep=' '))
+
+# Utilizando la matriz anteriormente generada, dibujo una grafica de barras
+barplot(resultados[1:2,], main='Secundaria de Padre y/o Madre y Escolaridad del Entrevistado', 
+        
+        # Modifico la documentacion de la grafica
+        names.arg=grados_str, cex.names=1, xlab='grado academico del entrevistado', ylab='probabilidad',
+        
+        # Modifico las caracteristicas de la grafica
+        col=c('darkgreen', 'darkolivegreen1'), beside=TRUE, ylim=c(0,1))
+
+# Escribo una leyenda para la grafica
+legend('topright', c('Al menos un padre termino la primaria', 'Ambos padres no terminaron la primaria'), fill = c('darkgreen','darkolivegreen1'))
+```
+
+---
+
+## Acceso a Computadora y Escolaridad del Entrevistado (1 punto).
+
+Divide la población encuestada entre los que **tuvieron acceso a una computadora a los 14 años** y los que no.
+
+- Calcula cuantas veces es más probable que una persona del primer grupo complete al menos la **secundaria** en comparación con los del segundo grupo. Y al menos la **licenciatura**? **Maestría**? **Doctorado**?
+
+- Visualiza las tendencias relevantes de los datos con un gráfica.
+
+```{r}
+# Indico cuales son los grados escolares por analizar
+grados <- c(3, 9, 11, 12)
+grados_str <- c('secundaria', 'licenciatura', 'maestria', 'doctorado')
+
+# Separo los perfiles entre los que tuvieron acceso a una computadora a los 14 años y los que no
+con_compu <- encuesta$P2_10_8 == 1
+sin_compu <- encuesta$P2_10_8 == 2
+
+# Calculo la probabilidad y algunos resultados relevantes para cada uno de los grados escolares
+resultados <- sapply(grados, calcular_probabilidad, caso1=con_compu, caso2=sin_compu)
+
+# Imprime los resultados al comparar las probabilidades de ambos casos
+print(paste('Aquellos individuos que tuvieron acceso a una computadora a los 14 años tienen', round(resultados[3,], 4), 
+            'veces mas probabilidades de terminar el grado de', grados_str,
+            'comparado con aquellos que no tuvieron acceso a una computadora a esa edad.', sep=' '))
+
+# Utilizando la matriz anteriormente generada, dibujo una grafica de barras
+barplot(resultados[1:2,], main='Acceso a Computadora y Escolaridad del Entrevistado', 
+        
+        # Modifico la documentacion de la grafica
+        names.arg=grados_str, cex.names=1, xlab='grado academico del entrevistado', ylab='probabilidad',
+        
+        # Modifico las caracteristicas de la grafica
+        col=c('darkblue', 'lightskyblue'), beside=TRUE, ylim=c(0,1))
+
+# Escribo una leyenda para la grafica
+legend('topright', c('Tuvieron acceso a una PC a los 14 años', 'No tuvieron acceso a una PC a los 14 años'), fill = c('darkblue','lightskyblue'))
+```
+
+---
+
+## Sexo del Entrevistado y su Nivel Escolar (1 punto).
+
+Divide la población encuestada entre **hombres** y **mujeres**.
+
+- Calcula cuantas veces es más probable que un hombre complete al menos la **licenciatura** en comparacióncon las mujeres. Y al menos la **maestría**? El **doctorado**?
+
+- Visualiza las tendencias relevantes de los datos con un gráfica.
+
+```{r}
+# Indico cuales son los grados escolares por analizar
+grados <- c(9, 11, 12)
+grados_str <- c('licenciatura', 'maestria', 'doctorado')
+
+# Separo los perfiles entre hombres y mujeres
+hombres <- encuesta$P1_1 == 1
+mujeres <- encuesta$P1_1 == 2
+
+# Calculo la probabilidad y algunos resultados relevantes para cada uno de los grados escolares
+resultados <- sapply(grados, calcular_probabilidad, caso1=hombres, caso2=mujeres)
+
+# Imprime los resultados al comparar las probabilidades de ambos casos
+print(paste('Los hombres tienen', round(resultados[3,], 4), 
+            'veces mas probabilidades de terminar el grado de', grados_str,
+            'comparado con las mujeres.', sep=' '))
+
+# Utilizando la matriz anteriormente generada, dibujo una grafica de barras
+barplot(resultados[1:2,], main='Sexo del Entrevistado y su Nivel Escolar', 
+        
+        # Modifico la documentacion de la grafica
+        names.arg=grados_str, cex.names=1, xlab='grado academico del entrevistado', ylab='probabilidad',
+        
+        # Modifico las caracteristicas de la grafica
+        col=c('magenta4', 'violet'), beside=TRUE, ylim=c(0,0.3))
+
+# Escribo una leyenda para la grafica
+legend('topright', c('Hombres', 'Mujeres'), fill = c('magenta4','violet'))
+```
+
+---
+
+## Tu Turno (3 puntos).
+
+En este ejercicio te toca proponer y calcular alguna estadística de interés que pueda arrojar luz a la clase de desigualdades que existen en el desarrollo social de México. Así como en los ejercicios anteriores, además debes dibujar una gráfica en la que se visualicen de manera clara los datos.
+
+## Identificación origen racial del Entrevistado y su Nivel Escolar
+
+```{r}
+# Defino una nueva funcion para obtener la probabilidad de multiples casos excluyentes
+calcular_probabilidad_mult <- function(grado, multi_casos) {
+  
+  # Encuentro los perfiles con grado igual o mayor al indicado
+  perfiles_grado <- encuesta$P8_3N >= grado
+  
+  # Encuentra la interseccion entre los perfiles del paso anterior y cada uno de los casos por separado 
+  perfiles_casos <- sapply(seq_len(ncol(multi_casos)), function(i) sum(encuesta$Factor_Per[(perfiles_grado & multi_casos)[,i]], na.rm=TRUE))
+  
+  # Normalizo los resultados para cada caso y retorno estas probabilidades
+  individuos_casos <- sapply(seq_len(ncol(multi_casos)), function(i) sum(encuesta$Factor_Per[multi_casos[,i]], na.rm=TRUE))
+  resultados <- perfiles_casos / individuos_casos
+  return(resultados)
+}
+```
+
+```{r}
+# Indico cuales son los grados escolares por analizar
+grados <- c(2, 3, 9, 11, 12)
+grados_str <- c('primaria', 'secundaria', 'licenciatura', 'maestria', 'doctorado')
+
+# Separo los perfiles dependiendo de la identificacion del origen racial del entrevistado
+origen_racial <- data.frame(negra=(encuesta$P10_3 == 1), indigena=(encuesta$P10_3 == 2), mestiza=(encuesta$P10_3 == 3), blanca=(encuesta$P10_3 == 4))
+
+# Calculo la probabilidad y algunos resultados relevantes para cada uno de los grados escolares
+resultados <- sapply(grados, calcular_probabilidad_mult, multi_casos=origen_racial)
+
+# Utilizando la matriz anteriormente generada, dibujo una grafica de barras
+barplot(resultados, main='Identificación origen racial del Entrevistado y su Nivel Escolar', 
+        
+        # Modifico la documentacion de la grafica
+        names.arg=grados_str, cex.names=1, xlab='grado academico del entrevistado', ylab='probabilidad',
+        
+        # Modifico las caracteristicas de la grafica
+        col=c('red', 'orange', 'limegreen', 'blue'), beside=TRUE, ylim=c(0,1))
+
+# Escribo una leyenda para la grafica
+legend('topright', c('Negra o mulata', 'Indígena', 'Mestiza', 'Blanca'), fill = c('red', 'orange', 'limegreen', 'blue'))
+```
+
+```
+Al ver los resultados me di cuenta que la diferencia entre la población que identifica su origen racial como mestizo, y aquellos que se dientificaron como blancos, no son muy distintos. Por lo tanto, decidi agrupar estos segmentos de la población en uno solo, y así facilitar la comparación con los segmentos más maginados en este contexto. Los  resultados son los siguientes.
+```
+
+```{r}
+# Indico cuales son los grados escolares por analizar
+grados <- c(2, 3, 9, 11, 12)
+grados_str <- c('primaria', 'secundaria', 'licenciatura', 'maestria', 'doctorado')
+
+# Separo los perfiles dependiendo de la identificacion del origen racial del entrevistado
+origen_racial <- data.frame(negra=(encuesta$P10_3 == 1), indigena=(encuesta$P10_3 == 2), mestiza=(encuesta$P10_3 == 3) | (encuesta$P10_3 == 4))
+
+# Calculo la probabilidad y algunos resultados relevantes para cada uno de los grados escolares
+resultados <- sapply(grados, calcular_probabilidad_mult, multi_casos=origen_racial)
+
+# Imprime los resultados al comparar las probabilidades entre casos
+print(paste('Los individuos mestizos o blancos tienen', round((resultados[3,] / resultados[1,]), 4), 
+            'veces mas probabilidades de terminar el grado de', grados_str,
+            'comparado con los individuos negros o mulatos, y tienen', round((resultados[3,] / resultados[2,]), 4),
+            'veces mas probabilidades comparado con los individuos indigenas', sep=' '))
+
+# Utilizando la matriz anteriormente generada, dibujo una grafica de barras
+barplot(resultados, main='Identificación origen racial del Entrevistado y su Nivel Escolar', 
+        
+        # Modifico la documentacion de la grafica
+        names.arg=grados_str, cex.names=1, xlab='grado academico del entrevistado', ylab='probabilidad',
+        
+        # Modifico las caracteristicas de la grafica
+        col=c('red', 'orange', 'blue'), beside=TRUE, ylim=c(0,1))
+
+# Escribo una leyenda para la grafica
+legend('topright', c('Negra o mulata', 'Indígena', 'Mestiza o blanca'), fill = c('red', 'orange', 'blue'))
+```
+
+---
+
+## Conclusión
+
+Escribe una breve conclusión a partir de los análisis anteriores. Que posibles explicaciones podrías darle a estos datos?
+
+```
+Estos resultados demuestran de forma explícita la desigualdad en el contexto académico que existe en nuestro país. Esta desigualdad puede ser abordada de forma independiente por diferentes condiciones en la vida de los entrevistados, pero la realidad es que todas actúan en conjunto, en mayor o menor medida, para perjudicar el desempeño escolar. Algunos resultados importantes por cada condición analizada son los siguientes:
+
+1. Aquellos entrevistados cuyos padres no fueron a la escuela tienen muy bajas probabilidades para terminar la licenciatura y los grados posteriores, en comparación con alguien que tiene al menos un padre que asistió a la escuela. Evidentemente hay una brecha social que impide que estos individuos desarrollen su vida escolar sin complicaciones. Algo que me parece positivo es que la mayoría de este segmento de la población sí ha ido a la escuela, y ha terminado la primaria, lo que disminuye el porcentaje de individuos que no tuvieron padres que fueron a la escuela. Esta tendencia mejoraría las probabilidades de un desempeños más exitosos para los hijos de esta población actualmente afectada.
+
+2. Aún más fuerte es la diferencia si comparamos las probabilidades de terminar la licenciatura y los grados posteriores entre aquellos que tienen al menos un padre no analfabeta, y los que no tienen padres no analfabetas. Al igual que la estadística anterior, existe una tendencia a la baja de analfabetismo porque aumenta la proporción de padres que terminaron la primaria en las futuras generaciones. Evidentemente habrá localidades donde esto no ocurre, y se debe hacer énfasis en mejorar los apoyos a esta comunidades más afectadas.
+
+3. Además, las probabilidades de terminar la licenciatura y los grados posteriores para aquellos que no tienen padres que terminaron la primaria siguen un patrón similar al de Los estadísticos anteriores. Sin embargo, hay una mejora en sus probabilidades de terminar la licenciatura, lo cual genera una tendencia positiva para las futuras generaciones de forma similar a los anteriores casos.
+
+4. En un mundo donde el conocimiento se encuentra fácilmente en la web, es de esperar que aquellos que poseen acceso facilitado al Internet o recursos electrónicos tengan mayores probabilidades de un buen desempeño académico. Precisamente esto se observa en este estadístico, el cual compara las probabilidades de terminar la secundaria y los grados posteriores entre aquellos que tuvieron acceso a una computadora cuando eran niños, y aquellos que no tuvieron esa posibilidad. Es por ello que un paso importante para mejorar el rendimiento académico de los estudiantes de los niveles mas bajos es facilitarles el acceso a estos recursos electrónicos. El gobierno debe centrar los refuerzos en este rubro, pues cimienta las bases para que los estudiantes y futuros trabajadores tengan un mayor desempeño en esta época íntimamente relacionada con la virtualidad.
+
+5. La brecha de género en lo que se refiere al grado de escolaridad terminado no es tan amplia como podría esperarse. Incluso, hay ligeramente más probabilidades de que una mujer termine su doctorado, comparado con las probabilidades de los hombres. Sin embargo, para descubrir la realidad sobre la desigualdad de género en las instituciones académicas del país es necesario analizar el desempeño y la productividad posteriores, es decir, durante el empleo. Es aquí donde se han reportado diferencias considerables en la retribución monetaria y la jerarquía que los hombres poseen sobre las mujeres, a pesar de tener el mismo grado acedémico. Este problema debe ser solucionado mediante la lucha conjunta de la sociedad y el gobierno contra el machismo, pues es una situación desagradable y muy injusta para las mujeres que se han esforzado incluso más que sus compañeros varones.
+
+6. Finalmente, mi análisis arrojó que el desempeño académico es muy similar entre individuos que se identifican como de ascendencia blanca y aquellos que se identifican como de ascendencia mestiza. Sin embargo, la brecha aparece al comparar estos segmentos de la población con aquellos que se identifican como de ascendencia negra o mulata, y se incrementa en los grados de licenciatura y los posteriores a este. Y el panorama es aún peor para aquellos que se identifican como de ascendencia indígena; esto es por la extensa marginalización que exite en la escuela actual hacia las lengüas indígenas y la discriminación con las que son atacados constantemente por el sistema social; una situación que se vive en un país que dice estar orgulloso con su nacionalidad, pero que no lo está del origen de la población de la misma.
+
+En conclusión, hay muy pocas probabilidades de terminar los grados escolares más altos, incluso si tienes bastantes condiciones a tu favor. Esto genera una competencia brutal, donde las personas que tienen condiciones en contra, o cuyos padres no desarrollaron una escolaridad próspera, son sesgados y su futuro laboral es perjudicado. Esto tendría solución con la apertura de más oportunidades de cursar cada uno de los grados escolares, sumado a lo discutido en los anteriores puntos. Este aumento de oportunidades no solo se refiere a la creación de más escuelas en todo el país, sino que además es necesario facilitar el acceso a ellas para la población más vulnerable, y que ha sido marginada durante siglos.
+```
+
+---
+
+## Reflexión
+
+Escribe una breve reflexión personal inspirada en los resultados anteriores.
+
+```
+Esta tarea me pareció muy buena, porque no es fácil dimensionar el problema de la desigualdad sólo con palabras. La estadística es de gran ayuda para mostrar directamente el panorama, tan desagradable, que es la brecha académica entre distintos sectores de la sociedad. En retrospectiva, mis padres terminaron la licenciatura; yo he asistido a escuela privada durante el primeras etapas de mi vida académica; he tenido acceso a la computadora desde que tengo memoria, y he estado familiarizado con el inglés desde la primaria. Además, no pertenezco a un sector vulnerable o marginado de la sociedad. Soy un caso muy raro en esta realidad que es México.
+
+Siempre he dicho que he llegado hasta donde estoy, en una licenciatura de alto rendimiento, gracias a mi disciplina y talento para aprender. Pero eso es apenas una pequeña parte de la historia de sucesos que me han conducido hasta estar escribiendo esta reflexión. El gran filtro responsable de mi educación excepcional es el resultado del esfuerzo de mis padres, así como las condiciones económicas y personales que no me restringieron aprender o asistir a la escuela, en cada una de sus etapas.
+
+Además, estudiar en escuela privada también es un lujo, una inversión costosa hecha por mis padres, que afortunadamente nunca se vió comprometida por contratiempos desafortunados. A pesar de ser un cliché, es cierto que algunos de mis compañeros en ese entonces no apreciaban o no les interesaba su educación como a otros, lo cual es una triste realidad porque a pesar de no esforzarse, tendrán mas probabilidades de tener una educación decente, en comparación con aquellos que tienen el mundo en contra. Por eso es muy importante remarcar la escasez de oportunidades, agravada por aquellos lugares ocupados por la clase privilegiada.
+
+Finalmente, creo que es importante el papel que puedo tener para disminuir la desigualdad del conocimiento en nuestro país. Como futuro científico, deberá ser una de mis prioridades desarrollar una habilidad de divulgación que me permita ayudar a los diferentes sectores de la población. Además, es de carácter imperativo respetar a todos los compañeros, valorar su presencia y comprender que hemos llegado al mismo punto mediante distintos caminos, los cuales están regidos en buena parte por las probabilidades calculadas en este análisis. Ya que he llegado tan lejos, lo mejor que puedo hacer es sacarle el máximo provecho a mi experiencia académica, y agradecer a aquellos que me han apoyado.
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
